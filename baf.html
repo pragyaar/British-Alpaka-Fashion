@@ -243,7 +243,7 @@
   /* Logo fades as you scroll, sticky minimal nav appears */
   .hero {
     position: relative;
-    height: 85svh; min-height: 520px;
+    height: 100svh; min-height: 640px;
     overflow: hidden;
     background: var(--ink);
     display: flex; align-items: center; justify-content: center;
@@ -252,7 +252,6 @@
   /* Full-screen video/image background */
   .hero-media {
     position: absolute; inset: 0;
-    background: url('hero-aerial.jpg') center 30% / cover no-repeat;
   }
   .hero-media img,
   .hero-media video {
@@ -909,7 +908,7 @@
   /* ── HALL OF FAME — node timeline ───── */
   .timeline {
     background: var(--ink);
-    padding: 120px 0 100px;
+    padding: 120px 0 40px;
     overflow: hidden;
   }
 
@@ -1118,15 +1117,19 @@
   /* Detail panel */
   .hof-detail {
     max-width: 700px;
-    margin: 40px auto 0;
+    margin: 0 auto;
     padding: 0 60px;
     opacity: 0;
+    max-height: 0;
+    overflow: hidden;
     transform: translateY(14px);
     pointer-events: none;
-    transition: opacity .5s var(--slow), transform .5s var(--slow);
+    transition: opacity .5s var(--slow), transform .5s var(--slow), max-height .5s var(--slow), margin .5s var(--slow);
   }
   .hof-detail.open {
     opacity: 1;
+    max-height: 300px;
+    margin: 40px auto 0;
     transform: translateY(0);
     pointer-events: auto;
   }
@@ -1818,7 +1821,7 @@
     <div class="hero-media">
       <!-- Replace src with actual video or image -->
       <video autoplay muted loop playsinline poster="hero-aerial.jpg">
-        <source src="hero-video-sm.mp4" type="video/mp4" />
+        <source src="hero-video.mp4" type="video/mp4" />
       </video>
       <div class="hero-media-overlay"></div>
     </div>
