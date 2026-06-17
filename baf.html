@@ -936,105 +936,146 @@
   }
 
   /* ── HALL OF FAME — snake timeline ──── */
-  .hof-snake-outer {
-    max-width: 700px;
-    margin: 0 auto;
-    padding: 0 20px 80px;
-  }
-  .hof-snake-wrap {
-    position: relative;
+  /* ── HALL OF FAME — horizontal timeline ── */
+  .hof-h-outer {
     width: 100%;
-    padding-bottom: 250%; /* matches viewBox 400×1000 ratio */
+    overflow-x: auto;
+    padding-bottom: 72px;
+    -webkit-overflow-scrolling: touch;
   }
+  .hof-h-wrap {
+    position: relative;
+    min-width: 960px;
+    height: 480px;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 60px;
+  }
+
+  /* Horizontal dashed line at vertical center */
   .hof-svg {
     position: absolute;
-    inset: 0;
-    width: 100%; height: 100%;
+    top: 50%; left: 60px;
+    width: calc(100% - 120px);
+    height: 4px;
+    transform: translateY(-50%);
     overflow: visible;
   }
   .hof-snake-path {
     fill: none;
     stroke: rgba(158,123,78,.45);
     stroke-width: 1.5;
-    stroke-dasharray: 6 5;
+    stroke-dasharray: 5 7;
   }
 
-  /* Beads — absolutely positioned over the SVG */
-  .hof-bead {
+  /* Stop — pinned to the line */
+  .hof-stop {
     position: absolute;
     display: flex;
     align-items: center;
-    gap: 18px;
-    transform: translate(-50%, -50%);
+    gap: 10px;
     left: var(--bx);
-    top: var(--by);
   }
-  .hof-bead.flip { flex-direction: row-reverse; }
+  /* above: dot at bottom, bubbles grow upward */
+  .hof-stop.above {
+    bottom: calc(50% - 7px);
+    flex-direction: column-reverse;
+    transform: translateX(-50%);
+  }
+  /* below: dot at top, bubbles grow downward */
+  .hof-stop.below {
+    top: calc(50% - 7px);
+    flex-direction: column;
+    transform: translateX(-50%);
+  }
 
-  .hof-node {
-    width: 96px; height: 96px;
+  /* Connector dot */
+  .hof-dot {
+    width: 14px; height: 14px;
     border-radius: 50%;
-    border: 1.5px solid rgba(158,123,78,.55);
     background: var(--ink);
-    display: flex; align-items: center; justify-content: center;
+    border: 2px solid var(--gold);
     flex-shrink: 0;
-    position: relative; z-index: 2;
-    transition: border-color .4s, transform .5s var(--slow), box-shadow .4s;
+    position: relative; z-index: 3;
+    transition: transform .4s var(--slow), box-shadow .4s;
   }
-  .hof-bead:hover .hof-node {
-    border-color: var(--gold);
-    box-shadow: 0 0 0 8px rgba(158,123,78,.07);
-    transform: scale(1.09);
+  .hof-stop.anchor .hof-dot {
+    width: 18px; height: 18px;
+    box-shadow: 0 0 0 5px rgba(158,123,78,.12);
   }
-  .hof-bead.first .hof-node::after,
-  .hof-bead.last .hof-node::after {
-    content: '';
-    position: absolute; inset: -10px;
-    border-radius: 50%;
-    border: 1px solid rgba(158,123,78,.22);
-    animation: bead-pulse 3s ease-out infinite;
+  .hof-stop:hover .hof-dot {
+    transform: scale(1.3);
+    box-shadow: 0 0 0 9px rgba(158,123,78,.1);
   }
   @keyframes bead-pulse {
-    0%   { transform:scale(1); opacity:.7; }
-    100% { transform:scale(1.4); opacity:0; }
+    0%   { transform:scale(1); opacity:.6; }
+    100% { transform:scale(2.2); opacity:0; }
+  }
+  .hof-stop.anchor .hof-dot::after {
+    content: '';
+    position: absolute; inset: -5px;
+    border-radius: 50%;
+    border: 1px solid rgba(158,123,78,.3);
+    animation: bead-pulse 2.8s ease-out infinite;
   }
 
-  .hof-year {
+  /* Event bubble stack */
+  .hof-events {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+  }
+
+  /* Single pill bubble */
+  .hof-ev {
+    background: rgba(17,16,8,.78);
+    border: 1px solid rgba(158,123,78,.28);
+    border-radius: 999px;
+    padding: 9px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    cursor: default;
+    width: 200px;
+    transition: border-color .35s, background .35s, border-radius .35s, padding .3s;
+  }
+  .hof-ev:hover {
+    border-color: rgba(158,123,78,.7);
+    background: rgba(17,16,8,.96);
+    border-radius: 12px;
+    padding: 11px 16px;
+  }
+  .hof-ey {
     font-family: var(--serif);
-    font-size: 21px; font-weight: 200;
-    letter-spacing: .06em;
+    font-size: 15px; font-weight: 200;
     color: var(--gold);
-    text-align: center;
+  }
+  .hof-et {
+    font-size: 9.5px; font-weight: 500;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: rgba(245,242,237,.7);
+  }
+  .hof-ed {
+    font-size: 9.5px; font-weight: 300;
+    line-height: 1.75;
+    color: rgba(245,242,237,.36);
+    max-height: 0; overflow: hidden;
+    opacity: 0;
+    transition: max-height .4s var(--slow), opacity .35s, padding .3s;
+  }
+  .hof-ev:hover .hof-ed {
+    max-height: 90px;
+    opacity: 1;
+    padding-top: 5px;
   }
 
-  .hof-bc { max-width: 190px; }
-  .hof-label {
-    display: block;
-    font-family: var(--serif);
-    font-size: clamp(14px, 1.4vw, 19px);
-    font-weight: 200;
-    color: rgba(245,242,237,.85);
-    letter-spacing: .03em;
-    margin-bottom: 7px;
-  }
-  .hof-text {
-    font-size: 11.5px; font-weight: 300;
-    line-height: 1.85;
-    color: rgba(245,242,237,.32);
-  }
-
-  .hof-bead.soon .hof-label { color: rgba(245,242,237,.2); font-style: italic; }
-  .hof-bead.soon .hof-text  { color: rgba(245,242,237,.13); font-style: italic; }
-  .hof-bead.soon .hof-node  { border-color: rgba(158,123,78,.2); }
-  .hof-bead.soon .hof-year  { color: rgba(158,123,78,.32); }
-
-  @media(max-width:600px){
-    .hof-bc { max-width: 120px; }
-    .hof-node { width:68px; height:68px; }
-    .hof-year { font-size:15px; }
-    .hof-label { font-size:13px; }
-    .hof-text { font-size:10px; }
-    .hof-bead { gap:10px; }
+  @media(max-width:900px){
+    .hof-h-wrap { height: 420px; min-width: 820px; }
+    .hof-ev { width: 160px; padding: 7px 13px; }
+    .hof-ey { font-size: 13px; }
   }
 
   /* ── OLD rail (kept for any remnant refs) */
@@ -1787,7 +1828,7 @@
         <!-- LEFT: text content -->
         <div class="ecosystem-head">
           <span class="eyebrow r">EKO Digital Product Passport</span>
-          <h2 class="ecosystem-h2 r d1">Our circular<br/><em>journey</em></h2>
+          <h2 class="ecosystem-h2 r d1">The circular<br/><em>journey</em></h2>
           <p class="ecosystem-desc r d2">Every British Alpaca Fashion garment follows a fully traceable circular path — from regenerative pasture in Exmoor, through artisan hands in Biella and Somerset, to your wardrobe and back again.</p>
           <div class="ecosystem-stages r d3">
             <div class="ecosystem-stage"><span class="ecosystem-stage-num">01</span><span class="ecosystem-stage-name">Regenerative Pasture</span></div>
@@ -1969,55 +2010,103 @@
       </div>
     </div>
 
-    <div class="hof-snake-outer">
-    <div class="hof-snake-wrap" id="hofSnake">
+    <div class="hof-h-outer">
+    <div class="hof-h-wrap" id="hofSnake">
 
-      <!-- SVG snake path — viewBox 400×1000 -->
-      <svg class="hof-svg" viewBox="0 0 400 1000" xmlns="http://www.w3.org/2000/svg">
-        <path class="hof-snake-path"
-          d="M200,55
-             C200,150 330,150 330,245
-             C330,340 70,340 70,435
-             C70,530 330,530 330,625
-             C330,720 70,720 70,815
-             C70,910 200,910 200,960"/>
+      <!-- Horizontal dashed line -->
+      <svg class="hof-svg" viewBox="0 0 100 1" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path class="hof-snake-path" d="M0,0.5 L100,0.5"/>
       </svg>
 
-      <!-- 2008 — centre top, label RIGHT -->
-      <div class="hof-bead first r" style="--bx:50%;--by:5.5%">
-        <div class="hof-node"><span class="hof-year">2008</span></div>
-        <div class="hof-bc">
-          <span class="hof-label">The Beginning</span>
-          <p class="hof-text">British Alpaca Fashion established at Weekfield Farm, Dulverton, Somerset.</p>
+      <!-- STOP 1 · 2008 — above -->
+      <div class="hof-stop above anchor r" style="--bx:8%">
+        <div class="hof-dot"></div>
+        <div class="hof-events">
+          <div class="hof-ev">
+            <span class="hof-ey">2008</span>
+            <span class="hof-et">The Beginning</span>
+            <span class="hof-ed">David receives Champagne &amp; Truffles as a birthday gift. British Alpaca Fashion established at Weekfield Farm, Somerset.</span>
+          </div>
         </div>
       </div>
 
-      <!-- 2012 — right curve, no content yet -->
-      <div class="hof-bead soon flip" style="--bx:82.5%;--by:24.5%">
-        <div class="hof-node"><span class="hof-year">2012</span></div>
+      <!-- STOP 2 · 2011–2012 — below -->
+      <div class="hof-stop below r d1" style="--bx:24%">
+        <div class="hof-dot"></div>
+        <div class="hof-events">
+          <div class="hof-ev">
+            <span class="hof-ey">2011</span>
+            <span class="hof-et">R&amp;D &amp; First Runway</span>
+            <span class="hof-ed">Research into 100% British alpaca yarns at heritage mills. First Fashion Show at Phyllis Court Club, Henley-on-Thames.</span>
+          </div>
+          <div class="hof-ev">
+            <span class="hof-ey">2012</span>
+            <span class="hof-et">National Recognition</span>
+            <span class="hof-ed">Winners of the Conservative Nationwide Start Up Hub Competition, UK.</span>
+          </div>
+        </div>
       </div>
 
-      <!-- 2015 — left curve, no content yet -->
-      <div class="hof-bead soon" style="--bx:17.5%;--by:43.5%">
-        <div class="hof-node"><span class="hof-year">2015</span></div>
+      <!-- STOP 3 · 2013–2015 — above -->
+      <div class="hof-stop above r d1" style="--bx:40%">
+        <div class="hof-dot"></div>
+        <div class="hof-events">
+          <div class="hof-ev">
+            <span class="hof-ey">2013</span>
+            <span class="hof-et">No. 10 Downing Street</span>
+            <span class="hof-ed">Exhibitions at Textile Forum London. Invited to meet PM David Cameron at Downing Street.</span>
+          </div>
+          <div class="hof-ev">
+            <span class="hof-ey">2015</span>
+            <span class="hof-et">Savile Row &amp; Peru</span>
+            <span class="hof-ed">D&amp;A Super 120s purchased by Richard Anderson at Savile Row. Invited to Arequipa Fiesta in Peru.</span>
+          </div>
+        </div>
       </div>
 
-      <!-- 2018 — right curve, no content yet -->
-      <div class="hof-bead soon flip" style="--bx:82.5%;--by:62.5%">
-        <div class="hof-node"><span class="hof-year">2018</span></div>
+      <!-- STOP 4 · 2016–2018 — below -->
+      <div class="hof-stop below r d1" style="--bx:57%">
+        <div class="hof-dot"></div>
+        <div class="hof-events">
+          <div class="hof-ev">
+            <span class="hof-ey">2016</span>
+            <span class="hof-et">Shima Seiki Expansion</span>
+            <span class="hof-ed">Knitwear production expanded using Japanese Shima Seiki machines — heritage craft meets precision technology.</span>
+          </div>
+          <div class="hof-ev">
+            <span class="hof-ey">2018</span>
+            <span class="hof-et">Silver Screen</span>
+            <span class="hof-ed">EkoAlpaka yarns selected by John Smedley. Textiles supplied to Murder on the Orient Express.</span>
+          </div>
+        </div>
       </div>
 
-      <!-- 2022 — left curve, no content yet -->
-      <div class="hof-bead soon" style="--bx:17.5%;--by:81.5%">
-        <div class="hof-node"><span class="hof-year">2022</span></div>
+      <!-- STOP 5 · 2019–2022 — above -->
+      <div class="hof-stop above r d1" style="--bx:74%">
+        <div class="hof-dot"></div>
+        <div class="hof-events">
+          <div class="hof-ev">
+            <span class="hof-ey">2019</span>
+            <span class="hof-et">Future Fashion Factory</span>
+            <span class="hof-ed">Smart clothing with conductive wires showcased at the Future Fashion Factory Exhibition.</span>
+          </div>
+          <div class="hof-ev">
+            <span class="hof-ey">2022</span>
+            <span class="hof-et">EU Fashion for Change</span>
+            <span class="hof-ed">EU Fashion for Change Programme. Digital product passport introduced for full supply-chain transparency.</span>
+          </div>
+        </div>
       </div>
 
-      <!-- 2026 — centre bottom, label RIGHT -->
-      <div class="hof-bead last r d4" style="--bx:50%;--by:96%">
-        <div class="hof-node"><span class="hof-year">2026</span></div>
-        <div class="hof-bc">
-          <span class="hof-label">Today &amp; Beyond</span>
-          <p class="hof-text">The EKOWORLD circle grows — connecting Exmoor to the world.</p>
+      <!-- STOP 6 · 2025 — below -->
+      <div class="hof-stop below anchor r d2" style="--bx:92%">
+        <div class="hof-dot"></div>
+        <div class="hof-events">
+          <div class="hof-ev">
+            <span class="hof-ey">2025</span>
+            <span class="hof-et">World &amp; Peace</span>
+            <span class="hof-ed">Selected for Ambiente Frankfurt. Inaugural peace exhibition in Hiroshima, Japan.</span>
+          </div>
         </div>
       </div>
 
