@@ -1082,16 +1082,16 @@
   .hof-h-outer { cursor: grab; user-select: none; }
   .hof-h-outer.dragging { cursor: grabbing; }
 
-  /* Bubbles start hidden, pop in after path draws */
+  /* Bubbles — transition always defined so class-toggle animates */
   .hof-ev {
     opacity: 0;
     transform: translateY(10px);
+    transition: opacity .5s var(--slow), transform .5s var(--slow),
+                border-color .35s, background .35s, border-radius .35s, padding .3s;
   }
   .hof-ev.hof-ev-in {
     opacity: 1;
     transform: translateY(0);
-    transition: opacity .5s var(--slow), transform .5s var(--slow),
-                border-color .35s, background .35s, border-radius .35s, padding .3s;
   }
   .hof-ev.hof-ev-active {
     border-color: var(--gold) !important;
@@ -1099,11 +1099,14 @@
     border-radius: 12px !important;
   }
 
-  /* Path clip reveal — wipes left to right */
-  .hof-svg { clip-path: inset(0 100% 0 0); }
+  /* Path reveal — scaleX wipe from left */
+  .hof-svg {
+    transform-origin: left center;
+    transform: translateY(-50%) scaleX(0);
+    transition: transform 1.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
   .hof-svg.hof-path-in {
-    clip-path: inset(0 0% 0 0);
-    transition: clip-path 1.6s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(-50%) scaleX(1);
   }
 
   /* Detail panel */
