@@ -1078,6 +1078,79 @@
     .hof-ey { font-size: 13px; }
   }
 
+  /* ── HOF interactive states ── */
+  .hof-h-outer { cursor: grab; user-select: none; }
+  .hof-h-outer.dragging { cursor: grabbing; }
+
+  /* Bubbles start hidden, pop in after path draws */
+  .hof-ev {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  .hof-ev.hof-ev-in {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity .5s var(--slow), transform .5s var(--slow),
+                border-color .35s, background .35s, border-radius .35s, padding .3s;
+  }
+  .hof-ev.hof-ev-active {
+    border-color: var(--gold) !important;
+    background: rgba(158,123,78,.1) !important;
+    border-radius: 12px !important;
+  }
+
+  /* Path clip reveal — wipes left to right */
+  .hof-svg { clip-path: inset(0 100% 0 0); }
+  .hof-svg.hof-path-in {
+    clip-path: inset(0 0% 0 0);
+    transition: clip-path 1.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Detail panel */
+  .hof-detail {
+    max-width: 700px;
+    margin: 40px auto 0;
+    padding: 0 60px;
+    opacity: 0;
+    transform: translateY(14px);
+    pointer-events: none;
+    transition: opacity .5s var(--slow), transform .5s var(--slow);
+  }
+  .hof-detail.open {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .hof-detail-inner {
+    border-left: 1px solid rgba(158,123,78,.4);
+    padding: 24px 32px;
+    position: relative;
+  }
+  .hof-detail-close {
+    position: absolute; top: 20px; right: 0;
+    background: none; border: none; cursor: pointer;
+    color: rgba(245,242,237,.3); font-size: 18px;
+    transition: color .3s;
+  }
+  .hof-detail-close:hover { color: var(--gold); }
+  .hof-detail-year {
+    font-family: var(--serif);
+    font-size: clamp(40px, 5vw, 64px);
+    font-weight: 200; color: var(--gold);
+    display: block; line-height: 1; margin-bottom: 10px;
+  }
+  .hof-detail-title {
+    font-size: 9px; font-weight: 600;
+    letter-spacing: .24em; text-transform: uppercase;
+    color: rgba(245,242,237,.5);
+    display: block; margin-bottom: 20px;
+  }
+  .hof-detail-desc {
+    font-size: 13.5px; font-weight: 300;
+    line-height: 2; color: rgba(245,242,237,.55);
+    max-width: 480px;
+  }
+
   /* ── OLD rail (kept for any remnant refs) */
   .tl-rail { display:none; }
   .tl-year {
@@ -2112,6 +2185,17 @@
 
     </div>
     </div>
+
+    <!-- Detail panel — populated by JS on bubble click -->
+    <div class="hof-detail" id="hofDetail">
+      <div class="hof-detail-inner">
+        <button class="hof-detail-close" id="hofDetailClose" aria-label="Close">✕</button>
+        <span class="hof-detail-year" id="hofDetailYear"></span>
+        <span class="hof-detail-title" id="hofDetailTitle"></span>
+        <p class="hof-detail-desc" id="hofDetailDesc"></p>
+      </div>
+    </div>
+
   </section>
 
   <!-- ═══════════════════════════════════════
@@ -2591,7 +2675,76 @@
     }), {threshold: 0.5});
     document.querySelectorAll('.material-stat').forEach(el => awardObs.observe(el));
 
+  /* ══════════════════════════════════════
+     10. HALL OF FAME — interactive
+  ══════════════════════════════════════ */
+  (function(){
+    const hofSection = document.getElementById('halloffame');
+    const hofSvg     = hofSection.querySelector('.hof-svg');
+    const hofOuter   = hofSection.querySelector('.hof-h-outer');
+    const hofEvs     = hofSection.querySelectorAll('.hof-ev');
+    const hofDetail  = document.getElementById('hofDetail');
+    const hofClose   = document.getElementById('hofDetailClose');
+    const hofYear    = document.getElementById('hofDetailYear');
+    const hofTitle   = document.getElementById('hofDetailTitle');
+    const hofDesc    = document.getElementById('hofDetailDesc');
+
+    // A. PATH DRAW + BUBBLE POP-IN (on scroll into view)
+    const hofObs = new IntersectionObserver(entries => {
+      if (!entries[0].isIntersecting) return;
+      hofSvg.classList.add('hof-path-in');
+      hofEvs.forEach((ev, i) => {
+        setTimeout(() => ev.classList.add('hof-ev-in'), 800 + i * 130);
+      });
+      hofObs.disconnect();
+    }, { threshold: 0.2 });
+    hofObs.observe(hofSection);
+
+    // B. DRAG TO SCROLL
+    let isDown = false, startX, scrollStart;
+    hofOuter.addEventListener('mousedown', e => {
+      isDown = true;
+      hofOuter.classList.add('dragging');
+      startX = e.pageX - hofOuter.offsetLeft;
+      scrollStart = hofOuter.scrollLeft;
+    });
+    document.addEventListener('mouseup', () => {
+      isDown = false;
+      hofOuter.classList.remove('dragging');
+    });
+    hofOuter.addEventListener('mousemove', e => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - hofOuter.offsetLeft;
+      hofOuter.scrollLeft = scrollStart - (x - startX) * 1.4;
+    });
+
+    // C. CLICK BUBBLE → DETAIL PANEL
+    hofEvs.forEach(ev => {
+      ev.addEventListener('click', () => {
+        const year  = ev.querySelector('.hof-ey').textContent;
+        const title = ev.querySelector('.hof-et').textContent;
+        const desc  = ev.querySelector('.hof-ed').textContent.trim();
+
+        hofEvs.forEach(e => e.classList.remove('hof-ev-active'));
+        ev.classList.add('hof-ev-active');
+
+        hofYear.textContent  = year;
+        hofTitle.textContent = title;
+        hofDesc.textContent  = desc;
+
+        hofDetail.classList.add('open');
+        setTimeout(() => hofDetail.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
+      });
+    });
+
+    hofClose.addEventListener('click', () => {
+      hofDetail.classList.remove('open');
+      hofEvs.forEach(e => e.classList.remove('hof-ev-active'));
+    });
   })();
+
+  })(); // end main IIFE
   </script>
 
 </body>
